@@ -24,7 +24,7 @@ export class FeedPage {
   }
 
   ionViewDidLoad() {
-    this.somaDoisNumeros(1, 4);
+    // this.somaDoisNumeros(1, 4);
     console.log('ionViewDidLoad FeedPage');
   }
 
