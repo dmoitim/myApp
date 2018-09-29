@@ -27,6 +27,8 @@ export class FeedPage {
     hora_comentario: '11h ago'
   };
 
+  public lista_filmes = new Array<any>();
+
   public nome_usuario:string = 'DevA';
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private movieProvider: MovieProvider) {
@@ -39,7 +41,8 @@ export class FeedPage {
   ionViewDidLoad() {
     this.movieProvider.getLatestMovies().subscribe(
       data => {
-        console.log(data);
+        const response = (data as any);
+        this.lista_filmes = response.results;
       }, error => {
         console.log(error);
       }
