@@ -1,13 +1,6 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { MovieProvider } from '../../providers/movie/movie';
-
-/**
- * Generated class for the FeedPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -28,26 +21,63 @@ export class FeedPage {
   };
 
   public lista_filmes = new Array<any>();
+  public nome_usuario: string = 'DevA';
+  public loader;
+  public refresher;
+  public isRefreshing: boolean = false;
 
-  public nome_usuario:string = 'DevA';
-
-  constructor(public navCtrl: NavController, public navParams: NavParams, private movieProvider: MovieProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, private movieProvider: MovieProvider, public loadingCtrl: LoadingController) {
   }
 
-  public somaDoisNumeros(num1:number, num2:number):void {
+  abrirCarregando() {
+    this.loader = this.loadingCtrl.create({
+      content: "Carregando filmes..."
+    });
+    this.loader.present();
+  }
+
+  fecharCarregando() {
+    this.loader.dismiss();
+  }
+
+  public somaDoisNumeros(num1: number, num2: number): void {
     alert(num1 + num2);
   }
 
-  ionViewDidLoad() {
+  ionViewDidEnter() {
+    this.carregarFilmes();
+    console.log('ionViewDidLoad FeedPage');
+  }
+
+  carregarFilmes() {
+    this.abrirCarregando();
     this.movieProvider.getLatestMovies().subscribe(
       data => {
         const response = (data as any);
         this.lista_filmes = response.results;
+
+        this.fecharCarregando();
+        if (this.isRefreshing) {
+          this.refresher.complete();
+          this.isRefreshing = false;
+        }
       }, error => {
         console.log(error);
+
+        this.fecharCarregando();
+        if (this.isRefreshing) {
+          this.refresher.complete();
+          this.isRefreshing = false;
+        }
       }
     )
-    console.log('ionViewDidLoad FeedPage');
   }
 
+  doRefresh(refresher) {
+    console.log('Begin async operation', refresher);
+    this.refresher = refresher;
+    this.isRefreshing = true;
+
+    this.carregarFilmes();
+  }
 }
