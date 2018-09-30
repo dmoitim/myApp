@@ -26,6 +26,8 @@ export class FeedPage {
   public loader;
   public refresher;
   public isRefreshing: boolean = false;
+  public page: number = 1;
+  public infiniteScroll;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private movieProvider: MovieProvider, public loadingCtrl: LoadingController) {
   }
@@ -50,12 +52,18 @@ export class FeedPage {
     console.log('ionViewDidLoad FeedPage');
   }
 
-  carregarFilmes() {
+  carregarFilmes(newPage: boolean = false) {
     this.abrirCarregando();
-    this.movieProvider.getLatestMovies().subscribe(
+    this.movieProvider.getLatestMovies(this.page).subscribe(
       data => {
         const response = (data as any);
-        this.lista_filmes = response.results;
+
+        if (!newPage) {
+          this.lista_filmes = response.results;
+        } else {
+          this.lista_filmes = this.lista_filmes.concat(response.results);
+          this.infiniteScroll.complete();
+        }
 
         this.fecharCarregando();
         if (this.isRefreshing) {
@@ -75,7 +83,7 @@ export class FeedPage {
   }
 
   doRefresh(refresher) {
-    console.log('Begin async operation', refresher);
+    console.log('doRefresh acionado.', refresher);
     this.refresher = refresher;
     this.isRefreshing = true;
 
@@ -84,5 +92,14 @@ export class FeedPage {
 
   abrirDetalhes(filme) {
     this.navCtrl.push(FilmeDetalhesPage, { id: filme.id });
+  }
+
+  doInfinite(infiniteScroll) {
+    console.log('infiniteScroll acionado.');
+    this.infiniteScroll = infiniteScroll;
+    this.page++;
+    infiniteScroll.complete();
+
+    this.carregarFilmes(true);
   }
 }
